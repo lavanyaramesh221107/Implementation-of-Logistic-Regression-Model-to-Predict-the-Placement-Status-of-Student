@@ -25,42 +25,93 @@ RegisterNumber:212225230149
 */
 ```
 ```
-import numpy as np
-from sklearn.linear_model import LogisticRegression
+import pandas as pd
+
+# Load dataset
+data = pd.read_csv("Placement_Data.csv")
+
+# Copy dataset
+data1 = data.copy()
+
+# Drop unnecessary columns
+data1 = data1.drop(['sl_no', 'salary'], axis=1)
+
+# Check null values
+print(data1.isnull().sum())
+
+# Check duplicates
+print(data1.duplicated().sum())
+
+# Label Encoding
+from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+
+data1["gender"] = le.fit_transform(data1["gender"])
+data1["ssc_b"] = le.fit_transform(data1["ssc_b"])
+data1["hsc_b"] = le.fit_transform(data1["hsc_b"])
+data1["hsc_s"] = le.fit_transform(data1["hsc_s"])
+data1["degree_t"] = le.fit_transform(data1["degree_t"])
+data1["workex"] = le.fit_transform(data1["workex"])
+data1["specialisation"] = le.fit_transform(data1["specialisation"])
+data1["status"] = le.fit_transform(data1["status"])
+
+# Input and Output
+x = data1.iloc[:, :-1]
+y = data1["status"]
+
+# Split dataset
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 
-X = np.array([
-    [6.5, 110],
-    [7.0, 120],
-    [8.0, 130],
-    [5.5, 100],
-    [6.0, 105],
-    [7.5, 125],
-    [8.5, 135],
-    [5.0, 95]
-])
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.2, random_state=0
+)
 
-Y = np.array([0, 1, 1, 0, 0, 1, 1, 0])
+# Logistic Regression Model
+from sklearn.linear_model import LogisticRegression
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+model = LogisticRegression(solver='liblinear')
 
-model = LogisticRegression()
-model.fit(X_train, Y_train)
+# Train model
+model.fit(x_train, y_train)
 
-Y_pred = model.predict(X_test)
+# Prediction
+y_pred = model.predict(x_test)
 
-print("Accuracy:", accuracy_score(Y_test, Y_pred))
+# Evaluation
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
-new_student = np.array([[7.2, 118]])
-prediction = model.predict(new_student)
+accuracy = accuracy_score(y_test, y_pred)
+confusion = confusion_matrix(y_test, y_pred)
+cr = classification_report(y_test, y_pred)
 
-print("Placement Prediction (1=Placed, 0=Not Placed):", prediction[0])
+# Print results
+print("Accuracy score:", accuracy)
+
+print("\nConfusion matrix:\n")
+print(confusion)
+
+print("\nClassification Report:\n")
+print(cr)
+
+# Confusion Matrix Graph
+from sklearn import metrics
+import matplotlib.pyplot as plt
+
+cm_display = metrics.ConfusionMatrixDisplay(
+    confusion_matrix=confusion,
+    display_labels=[True, False]
+)
+
+cm_display.plot()
+
+plt.show()
 ```
 
 ## Output:
-<img width="1223" height="72" alt="image" src="https://github.com/user-attachments/assets/8fd0a84d-70ab-4016-9e91-5c6ec0b08cdb" />
+<img width="1305" height="403" alt="image" src="https://github.com/user-attachments/assets/552e3d60-ef96-4057-8029-3bcd1d825074" />
 
+<img width="1284" height="604" alt="image" src="https://github.com/user-attachments/assets/06268c6a-e4a9-4a3a-a8cb-565f099aeae9" />
 
 
 ## Result:
